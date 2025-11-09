@@ -63,6 +63,21 @@ app.post("/users", async (req, res) => {
   }
 });
 
+app.post("/habits", async (req, res) => {
+  const habitData = req.body;
+  const habitCollection = app.locals.habitCollection;
+  habitData.createdAt = new Date();
+  habitData.completionHistory = [];
+
+  try {
+    const result = await habitCollection.insertOne(habitData);
+    res.send(result);
+  } catch (error) {
+    console.error("Failed to insert habit:", error);
+    res.status(500).send({ message: "Failed to insert habit" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
