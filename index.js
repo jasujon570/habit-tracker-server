@@ -78,6 +78,21 @@ app.post("/habits", async (req, res) => {
   }
 });
 
+app.get("/habits/featured", async (req, res) => {
+  const habitCollection = app.locals.habitCollection;
+  try {
+    const featuredHabits = await habitCollection
+      .find()
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .toArray();
+    res.send(featuredHabits);
+  } catch (error) {
+    console.error("Failed to get featured habits:", error);
+    res.status(500).send({ message: "Failed to get featured habits" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
