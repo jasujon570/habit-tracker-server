@@ -146,6 +146,43 @@ app.patch("/habits/:id", async (req, res) => {
   }
 });
 
+app.patch("/habits/complete/:id", async (req, res) => {
+  const id = req.params.id;
+  const habitCollection = app.locals.habitCollection;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  try {
+    const filter = { _id: new ObjectId(id) };
+
+    const habit = await habitCollection.findOne(filter);
+    const alreadyCompleted = habit.completionHistory.some((entry) => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return entryDate.getTime() === today.getTime();
+    });
+
+    if (alreadyCompleted) {
+      return res.send({
+        message: "Habit already completed today.",
+        modifiedCount: 0,
+      });
+    }
+
+    const updateDoc = {
+      $push: {
+        completionHistory: { date: new Date() },
+      },
+    };
+    const result = await habitCollection.updateOne(filter, updateDoc);
+    res.send(result);
+  } catch (error) {
+    console.error("Failed to mark habit complete:", error);
+    res.status(500).send({ message: "Failed to mark habit complete" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
