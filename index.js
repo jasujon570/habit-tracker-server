@@ -183,6 +183,31 @@ app.patch("/habits/complete/:id", async (req, res) => {
   }
 });
 
+app.get("/habits", async (req, res) => {
+  const habitCollection = app.locals.habitCollection;
+
+  const category = req.query.category;
+  const searchTerm = req.query.search;
+
+  let query = {};
+
+  if (category) {
+    query.category = category;
+  }
+
+  if (searchTerm) {
+    query.title = { $regex: searchTerm, $options: "i" };
+  }
+
+  try {
+    const habits = await habitCollection.find(query).toArray();
+    res.send(habits);
+  } catch (error) {
+    console.error("Failed to get public habits:", error);
+    res.status(500).send({ message: "Failed to get public habits" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
