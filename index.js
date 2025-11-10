@@ -208,6 +208,24 @@ app.get("/habits", async (req, res) => {
   }
 });
 
+app.get("/habit/:id", async (req, res) => {
+  const id = req.params.id;
+  const habitCollection = app.locals.habitCollection;
+
+  try {
+    const query = { _id: new ObjectId(id) };
+    const habit = await habitCollection.findOne(query);
+
+    if (!habit) {
+      return res.status(404).send({ message: "Habit not found" });
+    }
+    res.send(habit);
+  } catch (error) {
+    console.error("Failed to get single habit:", error);
+    res.status(500).send({ message: "Failed to get single habit" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
