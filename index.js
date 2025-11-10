@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const { ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -104,6 +105,44 @@ app.get("/habits/:email", async (req, res) => {
   } catch (error) {
     console.error("Failed to get user habits:", error);
     res.status(500).send({ message: "Failed to get user habits" });
+  }
+});
+
+app.delete("/habits/:id", async (req, res) => {
+  const id = req.params.id;
+  const habitCollection = app.locals.habitCollection;
+
+  try {
+    const query = { _id: new ObjectId(id) };
+    const result = await habitCollection.deleteOne(query);
+    res.send(result);
+  } catch (error) {
+    console.error("Failed to delete habit:", error);
+    res.status(500).send({ message: "Failed to delete habit" });
+  }
+});
+
+app.patch("/habits/:id", async (req, res) => {
+  const id = req.params.id;
+  const updatedData = req.body;
+  const habitCollection = app.locals.habitCollection;
+
+  try {
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = {
+      $set: {
+        title: updatedData.title,
+        description: updatedData.description,
+        category: updatedData.category,
+        reminderTime: updatedData.reminderTime,
+        image: updatedData.image,
+      },
+    };
+    const result = await habitCollection.updateOne(filter, updateDoc);
+    res.send(result);
+  } catch (error) {
+    console.error("Failed to update habit:", error);
+    res.status(500).send({ message: "Failed to update habit" });
   }
 });
 
