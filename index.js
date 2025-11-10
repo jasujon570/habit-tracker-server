@@ -93,6 +93,20 @@ app.get("/habits/featured", async (req, res) => {
   }
 });
 
+app.get("/habits/:email", async (req, res) => {
+  const userEmail = req.params.email;
+  const habitCollection = app.locals.habitCollection;
+
+  try {
+    const query = { userEmail: userEmail };
+    const userHabits = await habitCollection.find(query).toArray();
+    res.send(userHabits);
+  } catch (error) {
+    console.error("Failed to get user habits:", error);
+    res.status(500).send({ message: "Failed to get user habits" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
